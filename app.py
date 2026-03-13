@@ -204,7 +204,7 @@ elapsed     = int((now_utc - st.session_state["page_load_time"]).total_seconds()
 secs_left   = max(0, REFRESH_S - elapsed)
 mins_l, sec_p = divmod(secs_left, 60)
 next_refresh_str = f"{mins_l}:{sec_p:02d}"
-last_fetched_str = now_utc.strftime("%H:%M UTC")
+last_fetched_str = '<span id="crw-local-time">--:--</span>'
 
 
 # ─── HEADER ──────────────────────────────────────────────────────────────────
@@ -239,6 +239,27 @@ st.markdown(f"""
     </div>
   </div>
 </div>
+""", unsafe_allow_html=True)
+
+# Populate the local-time span with the browser's clock
+st.markdown("""
+<script>
+(function() {
+    function setLocalTime() {
+        var el = document.getElementById('crw-local-time');
+        if (el) {
+            var now = new Date();
+            var h = String(now.getHours()).padStart(2, '0');
+            var m = String(now.getMinutes()).padStart(2, '0');
+            var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
+            el.textContent = h + ':' + m + ' ' + tz.split('/').pop().replace('_', ' ');
+        } else {
+            setTimeout(setLocalTime, 100);
+        }
+    }
+    setLocalTime();
+})();
+</script>
 """, unsafe_allow_html=True)
 
 
