@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from streamlit_autorefresh import st_autorefresh
 from datetime import datetime, timezone, timedelta
 from scraper import fetch_all, TYPE_COLORS
@@ -204,7 +205,7 @@ elapsed     = int((now_utc - st.session_state["page_load_time"]).total_seconds()
 secs_left   = max(0, REFRESH_S - elapsed)
 mins_l, sec_p = divmod(secs_left, 60)
 next_refresh_str = f"{mins_l}:{sec_p:02d}"
-last_fetched_str = '<span id="crw-local-time">--:--</span>'
+last_fetched_str = "local time"
 
 
 # ─── HEADER ──────────────────────────────────────────────────────────────────
@@ -214,7 +215,7 @@ st.markdown(f"""
     <div class="live-dot"></div>
     <div>
       <h1>🛡️ CyberReg Watch</h1>
-      <div class="tagline">Cyber regulatory intelligence · live feed · updated {last_fetched_str}</div>
+      <div class="tagline">Cyber regulatory intelligence · live feed</div>
     </div>
   </div>
   <div class="crw-right">
@@ -241,26 +242,29 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Populate the local-time span with the browser's clock
-st.markdown("""
+# Inject local time using components.html (scripts actually execute here)
+components.html("""
+<style>
+  #local-time-bar {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: #3D5A80;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-top: -14px;
+    padding-left: 2px;
+  }
+</style>
+<div id="local-time-bar">updated &nbsp;<span id="lt">…</span></div>
 <script>
-(function() {
-    function setLocalTime() {
-        var el = document.getElementById('crw-local-time');
-        if (el) {
-            var now = new Date();
-            var h = String(now.getHours()).padStart(2, '0');
-            var m = String(now.getMinutes()).padStart(2, '0');
-            var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
-            el.textContent = h + ':' + m + ' ' + tz.split('/').pop().replace('_', ' ');
-        } else {
-            setTimeout(setLocalTime, 100);
-        }
-    }
-    setLocalTime();
-})();
+  var now = new Date();
+  var h   = String(now.getHours()).padStart(2,'0');
+  var m   = String(now.getMinutes()).padStart(2,'0');
+  var tz  = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  var city = tz.split('/').pop().replace(/_/g,' ');
+  document.getElementById('lt').textContent = h + ':' + m + (city ? ' · ' + city : '');
 </script>
-""", unsafe_allow_html=True)
+""", height=28)
 
 
 # ─── FILTERS ─────────────────────────────────────────────────────────────────
