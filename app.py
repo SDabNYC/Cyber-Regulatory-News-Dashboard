@@ -147,23 +147,33 @@ html, body, [class*="css"] {
 }
 .card-link:hover { opacity: 1; }
 
-/* Filter labels */
+/* Filter labels — hide all so search and dropdowns share same top edge */
 div[data-testid="stSelectbox"] label,
 div[data-testid="stMultiSelect"] label {
-    font-family: 'IBM Plex Mono', monospace !important;
-    font-size: 0.65rem !important; text-transform: uppercase;
-    letter-spacing: 1.5px; color: #3D5A80 !important;
+    display: none !important;
 }
 
-/* Search input */
+/* Search input — match multiselect height and padding exactly */
+div[data-testid="stTextInput"] {
+    margin-top: 0 !important;
+}
+div[data-testid="stTextInput"] label {
+    display: none !important;
+}
 .stTextInput > div > div > input {
     background: #0C1220 !important; border: 1px solid #1C2A3E !important;
     color: #D4DCE8 !important; border-radius: 8px !important;
     font-family: 'Inter', sans-serif !important; font-size: 0.85rem !important;
+    padding: 0.45rem 0.75rem !important;
 }
 .stTextInput > div > div > input:focus {
     border-color: #2563EB !important;
     box-shadow: 0 0 0 2px rgba(37,99,235,0.15) !important;
+}
+
+/* Multiselect — remove extra top spacing so all filters sit on same baseline */
+div[data-testid="stMultiSelect"] {
+    margin-top: 0 !important;
 }
 
 /* Multiselect pills */
@@ -244,28 +254,26 @@ st.markdown(f"""
 
 # Inject local time using components.html (scripts actually execute here)
 components.html("""
-<style>
-  body { margin: 0; padding: 0; background: transparent; }
-  #local-time-bar {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: #3D5A80;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 0;
-    margin: 0;
-  }
-</style>
-<div id="local-time-bar">updated &nbsp;<span id="lt">…</span></div>
 <script>
-  var now = new Date();
-  var h   = String(now.getHours()).padStart(2,'0');
-  var m   = String(now.getMinutes()).padStart(2,'0');
-  var tz  = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  var city = tz.split('/').pop().replace(/_/g,' ');
-  document.getElementById('lt').textContent = h + ':' + m + (city ? ' · ' + city : '');
+  (function() {
+    function writeTime() {
+      // Walk up to the Streamlit parent document and find our span
+      var el = window.parent.document.getElementById('crw-lt');
+      if (el) {
+        var now  = new Date();
+        var h    = String(now.getHours()).padStart(2,'0');
+        var m    = String(now.getMinutes()).padStart(2,'0');
+        var tz   = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        var city = tz.split('/').pop().replace(/_/g,' ');
+        el.textContent = h + ':' + m + (city ? ' · ' + city : '');
+      } else {
+        setTimeout(writeTime, 100);
+      }
+    }
+    writeTime();
+  })();
 </script>
-""", height=20)
+""", height=0)
 
 
 # ─── FILTERS ─────────────────────────────────────────────────────────────────
