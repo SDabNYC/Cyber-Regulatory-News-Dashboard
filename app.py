@@ -215,7 +215,7 @@ st.markdown(f"""
     <div class="live-dot"></div>
     <div>
       <h1>🛡️ CyberReg Watch</h1>
-      <div class="tagline">Cyber regulatory intelligence · live feed</div>
+      <div class="tagline">Cyber regulatory intelligence · live feed · updated <span id="crw-lt">…</span></div>
     </div>
   </div>
   <div class="crw-right">
@@ -245,14 +245,15 @@ st.markdown(f"""
 # Inject local time using components.html (scripts actually execute here)
 components.html("""
 <style>
+  body { margin: 0; padding: 0; background: transparent; }
   #local-time-bar {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
     color: #3D5A80;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    margin-top: -14px;
-    padding-left: 2px;
+    padding: 0;
+    margin: 0;
   }
 </style>
 <div id="local-time-bar">updated &nbsp;<span id="lt">…</span></div>
@@ -264,7 +265,7 @@ components.html("""
   var city = tz.split('/').pop().replace(/_/g,' ');
   document.getElementById('lt').textContent = h + ':' + m + (city ? ' · ' + city : '');
 </script>
-""", height=28)
+""", height=20)
 
 
 # ─── FILTERS ─────────────────────────────────────────────────────────────────
